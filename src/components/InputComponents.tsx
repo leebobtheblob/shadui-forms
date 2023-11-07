@@ -1,4 +1,6 @@
-const Input = ({
+import { Input } from "@components/ui/input";
+
+const IsaInput = ({
   name,
   label,
   register,
@@ -12,7 +14,7 @@ const Input = ({
       {label}
       {required && "*"}
     </label>
-    <input
+    <Input
       id={name}
       name={name}
       type={type}
@@ -26,4 +28,4 @@ const Input = ({
     )}
   </div>
 );
-export default Input;
+export default IsaInput;

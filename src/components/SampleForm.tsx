@@ -1,6 +1,6 @@
 "use client";
 import { useForm } from "react-hook-form";
-import Input from "@/components/InputComponents";
+import IsaInput from "@/components/InputComponents";
 export const NewTodoForm = (props) => {
   const {
     register,
@@ -15,7 +15,7 @@ export const NewTodoForm = (props) => {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <h1 className="form-title">Create a new Todo</h1>{" "}
-      <Input
+      <IsaInput
         type="text"
         name="title"
         label="Todo (e.g do laundry)"
@@ -30,7 +30,7 @@ export const NewTodoForm = (props) => {
         }}
         required
       />{" "}
-      <Input
+      <IsaInput
         type="date"
         name="date"
         label="Due Date"
@@ -41,7 +41,7 @@ export const NewTodoForm = (props) => {
         }}
         required
       />{" "}
-      <input type="submit" />
+      <IsaInput type="submit" />
     </form>
   );
 };
