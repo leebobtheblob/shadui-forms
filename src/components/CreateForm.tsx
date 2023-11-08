@@ -1,9 +1,22 @@
 "use client";
 
+import * as React from "react";
+import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -15,6 +28,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+
+const pipe_types = [
+  { value: "1", label: "one" },
+  { value: "2", label: "two" },
+  { value: "3", label: "three" },
+  { value: "4", label: "four" },
+  { value: "5", label: "five" },
+];
 
 const formSchema = z.object({
   inst_address: z.string().min(2, {
@@ -29,9 +50,11 @@ const formSchema = z.object({
     .email("This is not a valid email."),
   // .refine((e) => e === "abcd@fg.com", "This email is not in our database"),
 
-  type: z.string().min(1),
+  type: z.string({ required_error: "관종을 선택해주세요" }),
 });
 export function CreateForm() {
+  const [open, setOpen] = React.useState(false);
+  const [value, setValue] = React.useState("");
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -110,13 +133,50 @@ export function CreateForm() {
           control={form.control}
           name="type"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel> 사업장</FormLabel>
-              <FormControl>
-                <Input placeholder="yourEmail@gmail.com" {...field} />
-              </FormControl>
+            <FormItem className="flex flex-col">
+              <FormLabel>관종</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className={cn(
+                        "w-[200px] justify-between",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value
+                        ? pipe_types.find(
+                            (pipe_type) => pipe_type.value === field.value
+                          )?.label
+                        : "관로 종류를 선택하세요"}
+                      {/* <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" /> */}
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-[200px] p-0">
+                  <Command>
+                    <CommandInput placeholder="Search language..." />
+                    <CommandEmpty>No language found.</CommandEmpty>
+                    <CommandGroup>
+                      {pipe_types.map((pipe_type) => (
+                        <CommandItem
+                          value={pipe_type.label}
+                          key={pipe_type.value}
+                          onSelect={() => {
+                            form.setValue("type", pipe_type.value);
+                          }}
+                        >
+                          {pipe_type.label}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               <FormDescription>
-                This is your public display name.
+                This is the language that will be used in the dashboard.
               </FormDescription>
               <FormMessage />
             </FormItem>
