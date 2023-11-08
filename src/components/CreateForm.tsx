@@ -158,7 +158,7 @@ export function CreateForm() {
                 <PopoverContent className="w-[200px] p-0">
                   <Command>
                     <CommandInput placeholder="Search language..." />
-                    <CommandEmpty>No language found.</CommandEmpty>
+                    <CommandEmpty> 존재하지 않는 관종입니다</CommandEmpty>
                     <CommandGroup>
                       {pipe_types.map((pipe_type) => (
                         <CommandItem
@@ -175,9 +175,9 @@ export function CreateForm() {
                   </Command>
                 </PopoverContent>
               </Popover>
-              <FormDescription>
+              {/* <FormDescription>
                 This is the language that will be used in the dashboard.
-              </FormDescription>
+              </FormDescription> */}
               <FormMessage />
             </FormItem>
           )}
