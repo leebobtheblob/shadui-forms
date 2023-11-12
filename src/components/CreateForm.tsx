@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -28,6 +29,20 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Calendar } from "./ui/calendar";
+import { CalendarIcon } from "lucide-react";
+import { ToastAction } from "./ui/toast";
+import { useToast } from "./ui/use-toast";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@components/ui/select";
+
+import { format } from "date-fns";
 
 const pipe_types = [
   { value: "1", label: "one" },
@@ -44,147 +59,175 @@ const formSchema = z.object({
   l4_name: z.string().min(2, {
     message: "Username must be at least 2 characters.",
   }),
-  acqYear: z
-    .string()
-    .min(1, { message: "This field has to be filled." })
-    .email("This is not a valid email."),
-  // .refine((e) => e === "abcd@fg.com", "This email is not in our database"),
+  install_date: z.date({
+    required_error: "설치일자를 선택해주세요",
+  }),
 
   type: z.string({ required_error: "관종을 선택해주세요" }),
 });
 export function CreateForm() {
-  const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState("");
+  const [formMode, setFormMode] = useState("read");
+
+  useEffect(() => {
+    console.log(formMode);
+  });
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      inst_address: "",
-      l4_name: "",
-      acqYear: "",
-      type: "",
-    },
   });
+  const { toast } = useToast();
 
   // 2. Define a submit handler.
   function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+    // ✅ This will be type-safe and validated.\
+    // debugger;
+    toast({
+      title: " Registered value",
+      description: (
+        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
+        </pre>
+      ),
+    });
+    //console.log("hello");
   }
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="grid grid-cols-2 gap-2"
-      >
-        <FormField
-          control={form.control}
-          name="inst_address"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>설치주소</FormLabel>
-              <FormControl>
-                <Input placeholder="현재 설치 주소 입력" {...field} disabled />
-              </FormControl>
-              <FormDescription>
-                This is your public display name.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <>
+      {/* {formMode === "read" ? (
+        <Button
+          onClick={() => {
+            setFormMode("edit");
+          }}
+        >
+          edit{" "}
+        </Button>
+      ) : (
+        <Button onClick={() => setFormMode("read")}> read</Button>
+      )} */}
 
-        <FormField
-          control={form.control}
-          name="l4_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel> 계통</FormLabel>
-              <FormControl>
-                <Input placeholder="yourEmail@gmail.com" {...field} readOnly />
-              </FormControl>
-              <FormDescription>
-                This is your public display name.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="grid grid-cols-2 gap-2"
+        >
+          <FormField
+            control={form.control}
+            name="inst_address"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>설치주소</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="현재 설치 주소 입력"
+                    {...field}
+                    className="secondary"
+                  />
+                </FormControl>
+                <FormDescription>
+                  This is your public display name.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="acqYear"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel> 사업장</FormLabel>
-              <FormControl>
-                <Input placeholder="yourEmail@gmail.com" {...field} />
-              </FormControl>
-              <FormDescription>
-                This is your public display name.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="l4_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel> 계통</FormLabel>
+                <FormControl>
+                  <Input placeholder="yourEmail@gmail.com" {...field} />
+                </FormControl>
+                <FormDescription>
+                  This is your public display name.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>관종</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
+          <FormField
+            control={form.control}
+            name="install_date"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Date of birth</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-[240px] pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date("1900-01-01")
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormDescription>
+                  Your date of birth is used to calculate your age.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>관종 2</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      className={cn(
-                        "w-[200px] justify-between",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value
-                        ? pipe_types.find(
-                            (pipe_type) => pipe_type.value === field.value
-                          )?.label
-                        : "관로 종류를 선택하세요"}
-                      {/* <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" /> */}
-                    </Button>
+                    <SelectTrigger>
+                      <SelectValue placeholder="해당 되는 관종을 선택하세요" />
+                    </SelectTrigger>
                   </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0">
-                  <Command>
-                    <CommandInput placeholder="Search language..." />
-                    <CommandEmpty> 존재하지 않는 관종입니다</CommandEmpty>
-                    <CommandGroup>
-                      {pipe_types.map((pipe_type) => (
-                        <CommandItem
-                          value={pipe_type.label}
-                          key={pipe_type.value}
-                          onSelect={() => {
-                            form.setValue("type", pipe_type.value);
-                          }}
-                        >
-                          {pipe_type.label}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              {/* <FormDescription>
-                This is the language that will be used in the dashboard.
-              </FormDescription> */}
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                  <SelectContent>
+                    <SelectItem value="t01">type 1</SelectItem>
+                    <SelectItem value="t02">type 2</SelectItem>
+                    <SelectItem value="t03">type 3</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  두가지 방법으로 관종을 표시할수 있다.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <Button type="submit">Submit</Button>
-      </form>
-    </Form>
+          <Button type="submit">Submit</Button>
+        </form>
+      </Form>
+    </>
   );
 }
